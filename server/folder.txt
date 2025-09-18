@@ -1,0 +1,59 @@
+bookstore/
+│── cmd/                       # Application entry points
+│   └── server/
+│       └── main.go
+│
+│── config/                    # App configuration
+│   └── config.go
+│
+│── internal/                  # Core business logic
+│   ├── models/                # Database models
+│   │   ├── user.go
+│   │   ├── book.go
+│   │   ├── category.go
+│   │   ├── order.go
+│   │   └── transaction.go
+│   │
+│   ├── repositories/          # Database operations
+│   │   ├── user_repository.go
+│   │   ├── book_repository.go
+│   │   ├── category_repository.go
+│   │   ├── order_repository.go
+│   │   └── transaction_repository.go
+│   │
+│   ├── services/              # Business logic
+│   │   ├── auth_service.go
+│   │   ├── book_service.go
+│   │   ├── order_service.go
+│   │   └── payment_service.go
+│   │
+│   ├── handlers/              # HTTP controllers (Gin handlers)
+│   │   ├── auth_handler.go
+│   │   ├── book_handler.go
+│   │   ├── order_handler.go
+│   │   └── payment_handler.go
+│   │
+│   └── routes/                # API routes
+│       └── routes.go
+│
+│── pkg/                       # Utilities & middleware
+│   ├── logger/
+│   │   └── logger.go
+│   ├── middleware/
+│   │   ├── auth.go
+│   │   └── cors.go
+│   └── utils/
+│       ├── hash.go
+│       └── response.go
+│
+│── migrations/                # SQL migrations
+│   ├── 001_create_users.sql
+│   ├── 002_create_categories.sql
+│   ├── 003_create_books.sql
+│   ├── 004_create_orders.sql
+│   └── 005_create_transactions.sql
+│
+│── .env                       # Secrets (DB URL, Esewa keys, JWT secret)
+│── go.mod
+│── go.sum
+│── README.md
