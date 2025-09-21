@@ -7,44 +7,64 @@ import (
 	"bookstore/internal/routes"
 	"bookstore/internal/services"
 	"log"
+	"os"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	// Load environment variables
+	// Load .env
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("No .env file found, using system environment variables")
 	}
 
-	// Load configuration and DB
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		log.Fatal("FRONTEND_URL not set in .env")
+	}
+
+	// Load DB
 	cfg := config.LoadConfig()
 	db := cfg.DB
 
-	// Initialize repositories
+	// Repositories
 	userRepo := repositories.NewUserRepository(db)
 	categoryRepo := repositories.NewCategoryRepository(db)
 	bookRepo := repositories.NewBookRepository(db)
 	orderRepo := repositories.NewOrderRepository(db)
 
-	// Initialize services
+	// Services
 	authService := services.NewAuthService(userRepo)
 	categoryService := services.NewCategoryService(categoryRepo)
 	bookService := services.NewBookService(bookRepo)
 	orderService := services.NewOrderService(orderRepo)
 
-	// Initialize handlers
+	// Handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	bookHandler := handlers.NewBookHandler(bookService)
 	orderHandler := handlers.NewOrderHandler(orderService)
 
-	// Setup Gin router
+	// Gin router
 	router := gin.Default()
 
-	// Setup routes
+	// Proper CORS
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{frontendURL},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
+	router.RedirectTrailingSlash = false
+
+	// Routes
 	routes.SetupRoutes(router, authHandler, categoryHandler, bookHandler, orderHandler)
 
 	// Start server

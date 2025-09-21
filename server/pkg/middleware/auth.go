@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// AuthMiddleware validates JWT and extracts user info
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -31,9 +32,44 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Store user info in context
-		c.Set("user_id", claims["user_id"])
-		c.Set("role", claims["role"])
+		// ✅ store user info in context
+		if userID, ok := claims["user_id"].(string); ok {
+			c.Set("user_id", userID)
+		}
+		if role, ok := claims["role"].(string); ok {
+			c.Set("role", role)
+		}
+
 		c.Next()
+	}
+}
+
+// RequireRole restricts access to specific roles
+func RequireRole(roles ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		roleVal, exists := c.Get("role")
+		if !exists {
+			utils.ErrorResponse(c, http.StatusForbidden, "Role not found in token")
+			c.Abort()
+			return
+		}
+
+		userRole, ok := roleVal.(string)
+		if !ok {
+			utils.ErrorResponse(c, http.StatusForbidden, "Invalid role type")
+			c.Abort()
+			return
+		}
+
+		// Check if user role matches allowed roles
+		for _, r := range roles {
+			if userRole == r {
+				c.Next()
+				return
+			}
+		}
+
+		utils.ErrorResponse(c, http.StatusForbidden, "You do not have access to this resource")
+		c.Abort()
 	}
 }

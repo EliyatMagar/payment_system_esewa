@@ -16,14 +16,13 @@ func NewAuthService(userRepo *repositories.UserRepository) *AuthService {
 }
 
 // Register new user
-func (s *AuthService) Register(name, email, password string) (*models.User, error) {
+func (s *AuthService) Register(name, email, password, role string) (*models.User, error) {
 	// check if email exists
 	existing, _ := s.userRepo.FindByEmail(email)
 	if existing != nil {
 		return nil, errors.New("email already in use")
 	}
 
-	// hash password
 	hashed, err := utils.HashPassword(password)
 	if err != nil {
 		return nil, err
@@ -33,12 +32,14 @@ func (s *AuthService) Register(name, email, password string) (*models.User, erro
 		Name:     name,
 		Email:    email,
 		Password: hashed,
-		Role:     "customer",
+		Role:     role,
 	}
+
 	err = s.userRepo.Create(user)
 	if err != nil {
 		return nil, err
 	}
+
 	return user, nil
 }
 
@@ -60,4 +61,12 @@ func (s *AuthService) Login(email, password string) (string, error) {
 	}
 
 	return token, nil
+}
+
+func (s *AuthService) GetUserByID(id string) (*models.User, error) {
+	return s.userRepo.FindByID(id)
+}
+
+func (s *AuthService) GetUserByEmail(email string) (*models.User, error) {
+	return s.userRepo.FindByEmail(email)
 }
