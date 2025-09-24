@@ -27,3 +27,9 @@ type OrderItem struct {
 	Quantity int       `gorm:"not null" json:"quantity"`
 	Price    float64   `gorm:"not null" json:"price"`
 }
+
+const (
+	OrderStatusPending   = "PENDING"
+	OrderStatusPaid      = "PAID"
+	OrderStatusCancelled = "CANCELLED"
+)

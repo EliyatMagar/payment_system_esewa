@@ -24,8 +24,13 @@ export interface BookRequest {
 
 // Create Book
 export const createBook = async (book: BookRequest): Promise<Book> => {
-  const res = await api.post("/books", book);
+  const res = await api.post("/books/", book);
+  
+  if (res.status >= 400) {
+    throw new Error(`Failed to create book: ${res.statusText}`);
+  }
 
+  // Books API returns nested data: { data: { book: {...} }, success: true }
   if (res.data?.data?.book) {
     return res.data.data.book as Book;
   }
@@ -34,14 +39,22 @@ export const createBook = async (book: BookRequest): Promise<Book> => {
 
 // Get All Books
 export const getAllBooks = async (): Promise<Book[]> => {
-  const res = await api.get("/books");
+  const res = await api.get("/books/");
 
-  if (Array.isArray(res.data)) {
-    return res.data as Book[];
+  if (res.status >= 400) {
+    throw new Error(`Failed to fetch books: ${res.statusText}`);
   }
+
+  // Books API returns nested data: { data: { books: [...] }, success: true }
   if (res.data?.data?.books) {
     return res.data.data.books as Book[];
   }
+  
+  // Fallback: if it's directly an array
+  if (Array.isArray(res.data)) {
+    return res.data as Book[];
+  }
+  
   return res.data as Book[];
 };
 
@@ -49,6 +62,11 @@ export const getAllBooks = async (): Promise<Book[]> => {
 export const getBookById = async (id: string): Promise<Book> => {
   const res = await api.get(`/books/${id}`);
 
+  if (res.status >= 400) {
+    throw new Error(`Failed to fetch book: ${res.statusText}`);
+  }
+
+  // Books API returns nested data: { data: { book: {...} }, success: true }
   if (res.data?.data?.book) {
     return res.data.data.book as Book;
   }
@@ -62,6 +80,11 @@ export const updateBook = async (
 ): Promise<Book> => {
   const res = await api.put(`/books/${id}`, book);
 
+  if (res.status >= 400) {
+    throw new Error(`Failed to update book: ${res.statusText}`);
+  }
+
+  // Books API returns nested data: { data: { book: {...} }, success: true }
   if (res.data?.data?.book) {
     return res.data.data.book as Book;
   }
@@ -71,7 +94,13 @@ export const updateBook = async (
 // Delete Book
 export const deleteBook = async (id: string): Promise<boolean> => {
   const res = await api.delete(`/books/${id}`);
-  return res.data?.success ?? true;
+  
+  if (res.status >= 400) {
+    throw new Error(`Failed to delete book: ${res.statusText}`);
+  }
+
+  // Books API returns { success: true } or similar
+  return res.data?.success ?? (res.status === 200 || res.status === 204);
 };
 
 export default {

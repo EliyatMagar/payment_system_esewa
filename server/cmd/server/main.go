@@ -36,18 +36,21 @@ func main() {
 	categoryRepo := repositories.NewCategoryRepository(db)
 	bookRepo := repositories.NewBookRepository(db)
 	orderRepo := repositories.NewOrderRepository(db)
+	transactionRepo := repositories.NewTransactionRepository(db)
 
 	// Services
 	authService := services.NewAuthService(userRepo)
 	categoryService := services.NewCategoryService(categoryRepo)
 	bookService := services.NewBookService(bookRepo)
 	orderService := services.NewOrderService(orderRepo)
+	transactionService := services.NewTransactionService(transactionRepo, orderRepo)
 
 	// Handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	bookHandler := handlers.NewBookHandler(bookService)
 	orderHandler := handlers.NewOrderHandler(orderService)
+	transactionHandler := handlers.NewTransactionHandler(transactionService)
 
 	// Gin router
 	router := gin.Default()
@@ -65,7 +68,7 @@ func main() {
 	router.RedirectTrailingSlash = false
 
 	// Routes
-	routes.SetupRoutes(router, authHandler, categoryHandler, bookHandler, orderHandler)
+	routes.SetupRoutes(router, authHandler, categoryHandler, bookHandler, orderHandler, transactionHandler)
 
 	// Start server
 	log.Println("🚀 Server running at http://localhost:8080")

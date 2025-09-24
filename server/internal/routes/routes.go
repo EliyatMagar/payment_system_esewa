@@ -12,7 +12,7 @@ func SetupRoutes(
 	authHandler *handlers.AuthHandler,
 	categoryHandler *handlers.CategoryHandler,
 	bookHandler *handlers.BookHandler,
-	orderHandler *handlers.OrderHandler,
+	orderHandler *handlers.OrderHandler, transactionHandler *handlers.TransactionHandler,
 ) {
 	api := router.Group("/api")
 
@@ -70,6 +70,20 @@ func SetupRoutes(
 				orders.GET("/:id", middleware.RequireRole("admin", "customer"), orderHandler.GetOrderByID)
 				orders.PUT("/:id/status", middleware.RequireRole("admin"), orderHandler.UpdateOrderStatus)
 				orders.DELETE("/:id", middleware.RequireRole("admin"), orderHandler.DeleteOrder)
+			}
+
+			// Transaction routes
+			transactions := protected.Group("/transactions")
+			{
+				transactions.POST("", middleware.RequireRole("customer"), transactionHandler.CreateTransaction)
+				transactions.GET("", middleware.RequireRole("admin"), transactionHandler.GetAllTransactions)
+				transactions.GET("/user/my-transactions", middleware.RequireRole("customer"), transactionHandler.GetUserTransactions)
+				transactions.GET("/:id", middleware.RequireRole("admin", "customer"), transactionHandler.GetTransactionByID)
+				transactions.GET("/order/:orderId", middleware.RequireRole("admin", "customer"), transactionHandler.GetTransactionByOrderID)
+				transactions.PUT("/:id/status", middleware.RequireRole("admin"), transactionHandler.UpdateTransactionStatus)
+				transactions.POST("/esewa/initiate", middleware.RequireRole("customer"), transactionHandler.InitiateEsewaPayment)
+				transactions.POST("/esewa/verify", middleware.RequireRole("customer"), transactionHandler.VerifyEsewaPayment)
+				transactions.DELETE("/:id", middleware.RequireRole("admin"), transactionHandler.DeleteTransaction)
 			}
 		}
 	}
