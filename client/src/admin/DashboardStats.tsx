@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { useTransition } from 'react';
 import { Link } from 'react-router-dom';
 import { useBooks } from '../hooks/useBooks';
 import { useCategories } from '../hooks/useCategories';
 import { useOrders } from '../hooks/useOrder';
+import {useTransactions} from '../hooks/useTransactions'
 
 const DashboardStats: React.FC = () => {
   const { data: books, isLoading: booksLoading } = useBooks();
   const { data: categories, isLoading: categoriesLoading } = useCategories();
   const { data: orders, isLoading: ordersLoading } = useOrders();
+  const { data: transactions, isLoading: transactionsLoading } = useTransactions();
 
-  if (booksLoading || categoriesLoading || ordersLoading) {
+  if (booksLoading || categoriesLoading || ordersLoading || transactionsLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
@@ -31,6 +33,15 @@ const DashboardStats: React.FC = () => {
   const totalRevenue = orders
     ?.filter(order => order.status === 'PAID' || order.status === 'SHIPPED')
     ?.reduce((sum, order) => sum + order.total_price, 0) || 0;
+
+    //Add transaction statistics
+    const totalTransactions = transactions?.length || 0;
+    const pendingTransactions = transactions?.filter(t => t.status === 'PENDING').length || 0;
+    const successfulTransactions = transactions?.filter(t => t.status === 'SUCCESS').length || 0;
+
+    const transactionRevenue = transactions
+  ?.filter(t => t.status === 'SUCCESS')
+  ?.reduce((sum, t) => sum + t.amount, 0) || 0;
 
   // Calculate percentage changes (mock data for demonstration)
   const getRandomChange = () => (Math.random() * 20 + 5).toFixed(1);
@@ -117,6 +128,37 @@ const DashboardStats: React.FC = () => {
       color: 'green',
       description: 'All-time sales'
     },
+
+    { 
+    name: 'Total Transactions', 
+    value: totalTransactions, 
+    change: '+18%', 
+    changeType: 'increase',
+    icon: '💳',
+    color: 'purple',
+    link: '/admin/transactions',
+    description: 'Payment transactions'
+  },
+  { 
+    name: 'Pending Payments', 
+    value: pendingTransactions, 
+    change: pendingTransactions > 0 ? 'Review needed' : 'All processed',
+    changeType: pendingTransactions > 0 ? 'decrease' : 'neutral',
+    icon: '💰',
+    color: 'yellow',
+    link: '/admin/transactions?status=PENDING',
+    description: 'Awaiting processing'
+  },
+  { 
+    name: 'Transaction Revenue', 
+    value: `$${transactionRevenue.toLocaleString()}`, 
+    change: '+12.7%', 
+    changeType: 'increase',
+    icon: '💵',
+    color: 'green',
+    description: 'From successful payments'
+  },
+
   ];
 
   // Recent orders for activity section

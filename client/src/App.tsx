@@ -11,7 +11,14 @@ import BookManagement from './admin/BookManagement';
 import CategoryManagement from './admin/CategoryManagement';
 import UserManagement from './admin/UserManagement';
 import OrderManagement from './admin/OrderManagement';
+import TransactionManagement from './admin/TransactionManagement'
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
+//customer part
+
+import BookCatalog from './customer/BookCatalog'
+import BookDetail from './customer/BookDetail'
+import FeaturedBooks from './customer/FeaturedBooks'
 
 // Simple Protected Route - only checks for token
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -57,6 +64,16 @@ const App: React.FC = () => {
             } 
           />
 
+          //customer routes for books
+
+          <Route path="/books" element={<BookCatalog />}/>
+          <Route path="/books/:id" element={<BookDetail/>} />
+          <Route path="/" element={
+            <div>
+              <FeaturedBooks />
+            </div>
+          } />
+
           {/* Admin routes - require login (and eventually admin role) */}
           <Route 
             path="/admin" 
@@ -73,6 +90,8 @@ const App: React.FC = () => {
             <Route path="users" element={<UserManagement />} />
 
             <Route path="orders" element={<OrderManagement />} />
+
+             <Route path="transactions" element={<TransactionManagement />} />
           </Route>
           
           {/* 404 Page */}

@@ -37,6 +37,12 @@ const AdminLayout: React.FC = () => {
       icon: '👥',
       current: location.pathname === '/admin/users' 
     },
+    {
+      name:'Transactions',
+      href:'/admin/transactions',
+      icon:'💳',
+      current: location.pathname.startsWith('/admin/transactions')
+    },
     { 
       name: 'Analytics', 
       href: '/admin/analytics', 
